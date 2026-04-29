@@ -5,6 +5,7 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
+
 class Command(BaseCommand):
     help = 'Backup PostgreSQL database to AWS S3'
 
@@ -21,7 +22,7 @@ class Command(BaseCommand):
             '-d', settings.DATABASES['default']['NAME'],
             '-f', local_path,
         ], env={**os.environ, 'PGPASSWORD': settings.DATABASES['default']['PASSWORD']},
-        capture_output=True, text=True)
+            capture_output=True, text=True)
 
         if result.returncode != 0:
             self.stderr.write(f"pg_dump failed: {result.stderr}")
@@ -29,6 +30,8 @@ class Command(BaseCommand):
 
         self.stdout.write("Uploading to S3...")
         s3 = boto3.client('s3')
-        s3.upload_file(local_path, settings.AWS_STORAGE_BUCKET_NAME, f"backups/{filename}")
+        s3.upload_file(
+            local_path, settings.AWS_STORAGE_BUCKET_NAME, f"backups/{filename}")
         os.remove(local_path)
-        self.stdout.write(self.style.SUCCESS(f"Backup {filename} uploaded successfully."))
+        self.stdout.write(self.style.SUCCESS(
+            f"Backup {filename} uploaded successfully."))

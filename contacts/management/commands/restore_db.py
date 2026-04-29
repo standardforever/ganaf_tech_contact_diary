@@ -4,6 +4,7 @@ import boto3
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
+
 class Command(BaseCommand):
     help = 'Restore latest PostgreSQL backup from AWS S3'
 
@@ -36,10 +37,11 @@ class Command(BaseCommand):
             '-d', settings.DATABASES['default']['NAME'],
             '-f', local_path,
         ], env={**os.environ, 'PGPASSWORD': settings.DATABASES['default']['PASSWORD']},
-        capture_output=True, text=True)
+            capture_output=True, text=True)
 
         os.remove(local_path)
         if result.returncode != 0:
             self.stderr.write(f"Restore failed: {result.stderr}")
         else:
-            self.stdout.write(self.style.SUCCESS("Database restored successfully."))
+            self.stdout.write(self.style.SUCCESS(
+                "Database restored successfully."))
